@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Madox</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     body {
       background: #000;
       overflow: hidden;
@@ -21,7 +21,6 @@
       -webkit-tap-highlight-color: transparent;
       touch-action: none;
     }
-
     .dvd-logo {
       position: absolute;
       width: 180px;
@@ -34,16 +33,13 @@
       left: 50px;
       cursor: pointer;
     }
-
     .dvd-logo svg {
       width: 100%;
       height: auto;
     }
-
     .dvd-logo:active {
       transform: scale(1.1) !important;
     }
-
     /* Iconos sociales: GitHub centrado, solo X y GitHub */
     .social-icons {
       position: fixed;
@@ -54,21 +50,35 @@
       gap: 2.5rem;
       z-index: 10;
     }
-
     .social-icons a {
       color: #fff;
       font-size: 1.8rem;
       opacity: 0.7;
       transition: all 0.3s ease;
     }
-
     .social-icons a:hover,
     .social-icons a:active {
       opacity: 1;
       transform: scale(1.4);
       filter: drop-shadow(0 0 15px #0f0);
     }
-
+    #score {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.5rem;
+      color: #fff;
+      z-index: 10;
+      text-shadow: 0 0 8px rgba(0,255,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #score-num {
+      color: green;
+    }
     @media (max-width: 600px) {
       .dvd-logo { width: 120px; }
       .social-icons {
@@ -78,11 +88,14 @@
       .social-icons a {
         font-size: 1.5rem;
       }
+      #score {
+        font-size: 1.2rem;
+        top: 15px;
+      }
     }
   </style>
 </head>
 <body>
-
   <!-- Logo DVD VIDEO -->
   <div class="dvd-logo">
     <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
@@ -98,7 +111,10 @@
     </svg>
   </div>
 
-  <!-- Iconos: X y GitHub (GitHub centrado) -->
+  <!-- Score Display -->
+  <div id="score">Score Touch: <span id="score-num">0</span> <span id="emoji">💚</span></div>
+
+  <!-- Iconos: X y GitHub -->
   <div class="social-icons">
     <a href="https://x.com/madoxteam" target="_blank" aria-label="X">
       <svg width="28" height="28" viewBox="0 0 300 300" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -110,16 +126,16 @@
     </a>
   </div>
 
-  <!-- JavaScript: Rebote + Touch + Mouse -->
+  <!-- JavaScript: Rebote + Touch + Mouse + Score -->
   <script>
     const logo = document.querySelector('.dvd-logo');
     const logoWidth = 180;
     const logoHeight = 120;
-
     let x = Math.random() * (window.innerWidth - logoWidth);
     let y = Math.random() * (window.innerHeight - logoHeight);
     let dx = (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.8);
     let dy = (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.8);
+    let score = 0;
 
     function updateBounds() {
       return {
@@ -130,25 +146,46 @@
 
     function animate() {
       const { maxX, maxY } = updateBounds();
-
       x += dx;
       y += dy;
-
+      
+      // Rebote en los bordes
       if (x <= 0 || x >= maxX) dx = -dx;
       if (y <= 0 || y >= maxY) dy = -dy;
 
       logo.style.transform = `translate(${x}px, ${y}px)`;
-
       requestAnimationFrame(animate);
     }
-
     animate();
 
-    // REBOTE AL TOCAR O PASAR RATÓN
+    // Actualiza el puntaje y cambia el emoji
+    function updateScore() {
+      const numSpan = document.getElementById('score-num');
+      const emojiSpan = document.getElementById('emoji');
+      let emoji = '';
+
+      // Cambiar emoji basado en el puntaje
+      if (score >= 30) {
+        emoji = '🔥'; // Fuego
+      } else if (score >= 20) {
+        emoji = '💥'; // Explosión
+      } else if (score >= 10) {
+        emoji = '⚡'; // Rayo
+      } else {
+        emoji = '💚'; // Corazón verde
+      }
+
+      numSpan.textContent = score;
+      emojiSpan.textContent = emoji;
+    }
+
+    // Rebote + incremento de puntaje
     function bounce() {
       dx = -dx * 1.5;
       dy = -Math.abs(dy) * 1.5;
       logo.style.transition = 'transform 0.3s ease-out';
+      score += 4; // Incrementar el puntaje en 4
+      updateScore();
     }
 
     logo.addEventListener('mouseenter', bounce);
@@ -156,7 +193,6 @@
       e.preventDefault();
       bounce();
     });
-
     logo.addEventListener('mouseleave', () => {
       setTimeout(() => {
         logo.style.transition = 'transform 0.2s ease-out';
@@ -169,6 +205,5 @@
       y = Math.min(y, maxY);
     });
   </script>
-
 </body>
 </html>
