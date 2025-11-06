@@ -20,6 +20,7 @@
       font-family: Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
       touch-action: none;
+      color: white;
     }
     .dvd-logo {
       position: absolute;
@@ -29,8 +30,9 @@
       pointer-events: auto;
       filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
       transition: transform 0.2s ease-out;
-      top: 50px;
-      left: 50px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       cursor: pointer;
     }
     .dvd-logo svg {
@@ -40,7 +42,6 @@
     .dvd-logo:active {
       transform: scale(1.1) !important;
     }
-    /* Iconos sociales: GitHub centrado, solo X y GitHub */
     .social-icons {
       position: fixed;
       bottom: 20px;
@@ -79,6 +80,61 @@
     #score-num {
       color: green;
     }
+    /* Estilo para los emojis de los pingüinos */
+    .tux {
+      position: absolute;
+      font-size: 60px;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    #tux1, #tux2, #tux3 {
+      left: 33.33%;
+    }
+    #tux2 {
+      left: 50%;
+    }
+    #tux3 {
+      left: 66.66%;
+    }
+    #backToWorkMessage {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.5rem;
+      color: #fff;
+      text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+      display: none;
+    }
+    /* Crecimiento del emoji fantasma */
+    @keyframes growGhost {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(10);
+        opacity: 0;
+      }
+    }
+    #ghost {
+      position: fixed;
+      bottom: 50%;
+      left: 50%;
+      transform: translate(-50%, 50%);
+      font-size: 5rem;
+      color: white;
+      animation: growGhost 5s forwards;
+      display: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
     @media (max-width: 600px) {
       .dvd-logo { width: 120px; }
       .social-icons {
@@ -126,21 +182,33 @@
     </a>
   </div>
 
+  <!-- Emojis de Pingüinos -->
+  <div id="tux1" class="tux">🐧</div>
+  <div id="tux2" class="tux">🐧</div>
+  <div id="tux3" class="tux">🐧</div>
+
+  <!-- Mensaje de Back to the Work -->
+  <div id="backToWorkMessage">Back to the Work 👻</div>
+
+  <!-- Emoji del Fantasma -->
+  <div id="ghost">👻</div>
+
   <!-- JavaScript: Rebote + Touch + Mouse + Score -->
   <script>
     const logo = document.querySelector('.dvd-logo');
     const logoWidth = 180;
     const logoHeight = 120;
-    let x = Math.random() * (window.innerWidth - logoWidth);
-    let y = Math.random() * (window.innerHeight - logoHeight);
+    let x = Math.random() * (window.innerWidth - logoWidth) * 0.6;  // Reduce el rango en un 20% adicional (60%)
+    let y = Math.random() * (window.innerHeight - logoHeight) * 0.6;  // Reduce el rango en un 20% adicional (60%)
     let dx = (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.8);
     let dy = (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.8);
     let score = 0;
+    let tuxCount = 0;
 
     function updateBounds() {
       return {
-        maxX: window.innerWidth - logoWidth,
-        maxY: window.innerHeight - logoHeight
+        maxX: window.innerWidth * 0.6 - logoWidth,  // Reducido en un 20% adicional (60%)
+        maxY: window.innerHeight * 0.6 - logoHeight  // Reducido en un 20% adicional (60%)
       };
     }
 
@@ -168,15 +236,21 @@
       if (score >= 30) {
         emoji = '🔥'; // Fuego
       } else if (score >= 20) {
-        emoji = '💥'; // Explosión
+        emoji = '🍌'; // Banana
       } else if (score >= 10) {
-        emoji = '⚡'; // Rayo
+        emoji = '🍎'; // Manzana
       } else {
         emoji = '💚'; // Corazón verde
       }
 
       numSpan.textContent = score;
       emojiSpan.textContent = emoji;
+    }
+
+    // Restablecer la velocidad del logo y manejar el ciclo
+    function resetLogoSpeed() {
+      dx = (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.8);
+      dy = (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.8);
     }
 
     // Rebote + incremento de puntaje
@@ -186,6 +260,25 @@
       logo.style.transition = 'transform 0.3s ease-out';
       score += 4; // Incrementar el puntaje en 4
       updateScore();
+
+      // Comprobar si el puntaje llega a 44 y reiniciar o agregar pingüinos
+      if (score >= 44) {
+        if (tuxCount === 0) {
+          document.getElementById('tux1').style.opacity = 1;
+          tuxCount++;
+        } else if (tuxCount === 1) {
+          document.getElementById('tux2').style.opacity = 1;
+          tuxCount++;
+        } else if (tuxCount === 2) {
+          document.getElementById('tux3').style.opacity = 1;
+          tuxCount++;
+          // Mostrar el mensaje "Back to Work" con el emoji de fantasma
+          document.getElementById('backToWorkMessage').style.display = 'block';
+        }
+        score = 0; // Reiniciar el puntaje después de llegar a 44
+        logo.style.transform = 'translate(-50%, -50%)'; // Regresar el logo al centro
+        resetLogoSpeed(); // Restablecer la velocidad del logo
+      }
     }
 
     logo.addEventListener('mouseenter', bounce);
@@ -199,11 +292,32 @@
       }, 300);
     });
 
-    window.addEventListener('resize', () => {
-      const { maxX, maxY } = updateBounds();
-      x = Math.min(x, maxX);
-      y = Math.min(y, maxY);
-    });
+    // Hacer desaparecer todo y luego mostrar el fantasma
+    function hideAllAndShowGhost() {
+      // Ocultar todo visualmente
+      document.body.style.backgroundColor = 'black';
+      document.querySelector('.dvd-logo').classList.add('hidden');
+      document.querySelectorAll('.tux').forEach((element) => element.classList.add('hidden'));
+      document.getElementById('backToWorkMessage').classList.add('hidden');
+      
+      // Mostrar el emoji del fantasma
+      const ghost = document.getElementById('ghost');
+      ghost.style.display = 'block';  // Aparecer
+    }
+
+    // Llamar a la función para hacer que el fantasma crezca
+    let thirdCycleReached = false;
+    const checkBackToWorkMessage = () => {
+      if (!thirdCycleReached && tuxCount === 3) {
+        thirdCycleReached = true;
+        setTimeout(() => {
+          hideAllAndShowGhost(); // Esperar 3 segundos y luego mostrar el fantasma
+        }, 3000); // Espera 3 segundos antes de mostrar el fantasma
+      }
+    };
+
+    setInterval(checkBackToWorkMessage, 100);
+
   </script>
 </body>
 </html>
